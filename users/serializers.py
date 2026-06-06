@@ -1,35 +1,40 @@
 from rest_framework import serializers
-from django.contrib.auth import authenticate
-from .models import User
+from django.contrib.auth import get_user_model
 
-
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=6)
-
-    class Meta:
-        model = User
-        fields = ['phone_number', 'full_name', 'student_id', 'course', 'year_of_study', 'password']
-
-    def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
-
-
-class LoginSerializer(serializers.Serializer):
-    phone_number = serializers.CharField()
-    password = serializers.CharField(write_only=True)
-
-    def validate(self, data):
-        user = authenticate(username=data['phone_number'], password=data['password'])
-        if not user:
-            raise serializers.ValidationError('Invalid phone number or password')
-        if not user.is_active:
-            raise serializers.ValidationError('Account is disabled')
-        data['user'] = user
-        return data
+User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'phone_number', 'full_name', 'student_id', 'course', 'year_of_study', 'role', 'profile_picture', 'date_joined']
-        read_only_fields = ['id', 'date_joined']
+        fields = [
+            'id', 'phone_number', 'full_name', 'student_id',
+            'course', 'year_of_study', 'role', 'is_verified',
+            'profile_picture', 'date_joined',
+        ]
+        read_only_fields = ['id', 'role', 'is_verified', 'date_joined']
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=8)
+
+    class Meta:
+        model = User
+        fields = [
+            'phone_number', 'full_name', 'student_id',
+            'course', 'year_of_study', 'password',
+        ]
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.is_verified = False
+        user.role = 'student'
+        user.save()
+        return user
+
+
+class LoginSerializer(serializers.Serializer):
+    phone_number = serializers.CharField()
+    password = serializers.CharField()
