@@ -1,3 +1,9 @@
 from django.contrib import admin
+from .models import MpesaTransaction
 
-# Register your models here.
+
+@admin.register(MpesaTransaction)
+class MpesaTransactionAdmin(admin.ModelAdmin):
+    list_display = ['checkout_request_id', 'phone_number', 'amount', 'status', 'created_at']
+    list_filter = ['status']
+    readonly_fields = ['checkout_request_id', 'merchant_request_id', 'mpesa_receipt_number']
