@@ -133,3 +133,17 @@ MPESA_SHORTCODE = os.getenv('MPESA_SHORTCODE')
 MPESA_PASSKEY = os.getenv('MPESA_PASSKEY')
 MPESA_CALLBACK_URL = os.getenv('MPESA_CALLBACK_URL')
 MPESA_ENV = os.getenv('MPESA_ENV', 'sandbox')
+
+# Production
+import os
+ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = []
+
+# Static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Database — use environment variable in production
+import dj_database_url
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES['default'] = dj_database_url.config(default=DATABASE_URL)
