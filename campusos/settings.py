@@ -24,8 +24,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'cloudinary',
-    'cloudinary_storage',
     # Local apps
     'users',
     'cafeteria',
@@ -124,7 +122,6 @@ CLOUDINARY_STORAGE = {
     'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
 }
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # M-Pesa
 MPESA_CONSUMER_KEY = os.getenv('MPESA_CONSUMER_KEY')
