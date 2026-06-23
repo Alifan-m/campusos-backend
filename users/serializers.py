@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'phone_number', 'full_name', 'student_id',
+            'id', 'phone_number', 'email', 'full_name', 'student_id',
             'course', 'year_of_study', 'role', 'is_verified',
             'profile_picture', 'date_joined',
         ]
@@ -17,11 +17,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
+    email = serializers.EmailField(required=False, allow_blank=True)
 
     class Meta:
         model = User
         fields = [
-            'phone_number', 'full_name', 'student_id',
+            'phone_number', 'email', 'full_name', 'student_id',
             'course', 'year_of_study', 'password',
         ]
 
@@ -38,3 +39,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     phone_number = serializers.CharField()
     password = serializers.CharField()
+
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    phone_number = serializers.CharField()
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    phone_number = serializers.CharField()
+    code = serializers.CharField(min_length=6, max_length=6)
+    new_password = serializers.CharField(write_only=True, min_length=8)

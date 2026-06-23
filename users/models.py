@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from django.utils import timezone
+import random
 
 
 class UserManager(BaseUserManager):
@@ -28,6 +30,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     ]
 
     phone_number = models.CharField(max_length=15, unique=True)
+    email = models.EmailField(blank=True, null=True)
     full_name = models.CharField(max_length=150)
     student_id = models.CharField(max_length=50, blank=True, null=True, unique=True)
     course = models.CharField(max_length=100, blank=True)
@@ -38,6 +41,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     profile_picture = models.URLField(blank=True, null=True)
     date_joined = models.DateTimeField(auto_now_add=True)
+
+    # Password reset
+    reset_code = models.CharField(max_length=6, blank=True, null=True)
+    reset_code_expires = models.DateTimeField(blank=True, null=True)
 
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['full_name']
@@ -58,3 +65,22 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_super_admin(self):
         return self.role == 'super_admin'
+
+    def generate_reset_code(self):
+        code = ''.join(random.choices('0123456789', k=6))
+        self.reset_code = code
+        self.reset_code_expires = timezone.now() + timezone.timedelta(minutes=10)
+        self.save(update_fields=['reset_code', 'reset_code_expires'])
+        return code
+
+    def verify_reset_code(self, code):
+        if not self.reset_code or not self.reset_code_expires:
+            return False
+        if timezone.now() > self.reset_code_expires:
+            return False
+        return self.reset_code == code
+
+    def clear_reset_code(self):
+        self.reset_code = None
+        self.reset_code_expires = None
+        self.save(update_fields=['reset_code', 'reset_code_expires'])
