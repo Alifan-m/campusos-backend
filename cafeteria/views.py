@@ -86,3 +86,11 @@ class OrderStatusUpdateView(APIView):
             return Response(OrderSerializer(order).data)
         except Order.DoesNotExist:
             return Response({'error': 'Order not found.'}, status=404)
+
+
+class OrderHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        orders = Order.objects.filter(student=request.user).order_by('-created_at')
+        return Response(OrderSerializer(orders, many=True).data)
